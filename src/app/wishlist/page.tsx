@@ -2,7 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useWishlist } from "../context/WishlistContext";
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/src/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
+
 import { faGalacticRepublic } from "@fortawesome/free-brands-svg-icons";
 import { faGasPump } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
