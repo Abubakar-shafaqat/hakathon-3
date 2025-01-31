@@ -1,51 +1,53 @@
-// app/wishlist/page.tsx
-"use client";
-import Link from "next/link";
-import { FaHeart } from "react-icons/fa";
-import { useEffect, useState } from "react";
-import { useWishlist } from "../context/page";
-import Image from "next/image"; // Import the Image component
+"use client"; // Add this at the top since this is a client component
 
-interface Product {
+import { useEffect, useState } from "react";
+import { useWishlist } from "../context/WishlistContext";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "@/src/components/ui/card";
+import { faGalacticRepublic } from "@fortawesome/free-brands-svg-icons";
+import { faGasPump } from "@fortawesome/free-solid-svg-icons";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { MdPeopleOutline } from "react-icons/md";
+import { FaHeart } from "react-icons/fa";
+
+interface Car {
   id: number;
-  img: string;
-  title: string;
-  title2: string;
-  price: string;
-  description: string;
-  color: string[];
+  name: string;
+  type: string;
+  fuel_capacity: string;
+  transmission: string;
+  seating_capacity: string;
+  price_per_day: string;
+  image_url: string;
+  tags: string[];
 }
 
 export default function WishlistPage() {
   const { wishlist, removeFromWishlist } = useWishlist();
-  const [wishlistProducts, setWishlistProducts] = useState<Product[]>([]);
+  const [wishlistCars, setWishlistCars] = useState<Car[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Fetch wishlist products
+  // Fetch wishlist cars
   useEffect(() => {
-    const fetchWishlistProducts = async () => {
+    const fetchWishlistCars = async () => {
       try {
-        const response = await fetch('https://677ff2a50476123f76a8dd73.mockapi.io/product');
+        const response = await fetch("https://678cc7fcf067bf9e24e83478.mockapi.io/carrental");
         if (!response.ok) {
-          throw new Error("Failed to fetch products");
+          throw new Error("Failed to fetch cars");
         }
-        const allProducts = await response.json();
+        const allCars = await response.json();
 
-        // Filter products that are in wishlist
-        const filteredProducts = allProducts.filter((product: Product) =>
-          wishlist.includes(product.id)
-        );
-
-        setWishlistProducts(filteredProducts);
+        // Filter cars that are in wishlist
+        const filteredCars = allCars.filter((car: Car) => wishlist.includes(car.id));
+        setWishlistCars(filteredCars);
       } catch (error) {
-        setError(error instanceof Error ? error.message : "Failed to fetch wishlist products");
+        setError(error instanceof Error ? error.message : "Failed to fetch wishlist cars");
       } finally {
         setLoading(false);
       }
     };
 
-    fetchWishlistProducts();
+    fetchWishlistCars();
   }, [wishlist]);
 
   if (loading) {
@@ -60,43 +62,48 @@ export default function WishlistPage() {
     <div className="py-10">
       <h1 className="text-3xl font-bold text-center text-gray-800 mb-8">Your Wishlist</h1>
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 px-4">
-        {wishlistProducts.length === 0 ? (
+        {wishlistCars.length === 0 ? (
           <p className="text-center col-span-full">Your wishlist is empty!</p>
         ) : (
-          wishlistProducts.map((item) => (
-            <div key={item.id} className="hover:scale-105 transform transition duration-300 relative group">
-              {/* Heart Icon (Top-Right Corner) */}
-              <button
-                onClick={() => removeFromWishlist(item.id)}
-                className="absolute top-2 right-2 z-10 bg-white p-1 rounded-full"
-              >
-                <FaHeart size={20} className="text-red-500" />
-              </button>
-
-              <Link
-                href={`/products/product?id=${item.id}`}
-                className="bg-white shadow-md rounded-lg overflow-hidden hover:shadow-lg transition-shadow"
-              >
-                <div className="bg-[#F5F5F5] aspect-square group p-0">
-                  <Image
-                    src={item.img}
-                    alt={item.title}
-                    width={288} // Adjust width as needed
-                    height={288} // Adjust height as needed
-                    className="w-72 h-72 object-cover rounded-t-lg"
-                  />
+          wishlistCars.map((car) => (
+            <Card key={car.id} className="w-full max-w-[304px] mx-auto h-auto flex flex-col justify-between">
+              <CardHeader className="relative">
+                <CardTitle className="w-full flex items-center justify-between">
+                  {car.name}
+                  <div className="absolute top-2 right-2">
+                    <button
+                      onClick={() => removeFromWishlist(car.id)}
+                      className="bg-white p-1 rounded-full shadow-lg hover:bg-gray-100 transition-all"
+                    >
+                      <FaHeart size={20} className="text-red-500" />
+                    </button>
+                  </div>
+                </CardTitle>
+                <CardDescription>{car.type}</CardDescription>
+              </CardHeader>
+              <CardContent className="w-full flex flex-col items-center justify-center gap-4">
+                <img src={car.image_url} alt={car.name} width={220} height={68} />
+                <div className="flex items-center space-x-1">
+                  <FontAwesomeIcon icon={faGasPump} className="text-gray-400" style={{ width: '20px', height: '20px' }} />
+                  <span className="text-sm">{car.fuel_capacity}</span>
+                  <FontAwesomeIcon icon={faGalacticRepublic} className="text-gray-400" style={{ width: '20px', height: '20px' }} />
+                  <span className="text-sm">{car.transmission}</span>
+                  <MdPeopleOutline size={30} className="text-gray-400" />
+                  <span className="text-sm flex">{car.seating_capacity}</span>
                 </div>
-                <div className="mx-2 mt-2">
-                  <h4 className="font-semibold text-[#9E3500] text-sm">{item.title2}</h4>
-                  <h1 className="font-semibold text-sm mt-2">{item.title}</h1>
-                  <h4 className="text-sm text-[#757575] justify-between">color: {item.color.join(', ')}</h4>
-                  <h2 className="font-medium text-sm mt-2">MRP: {item.price}</h2>
-                </div>
-              </Link>
-            </div>
+              </CardContent>
+              <CardFooter className="w-full flex items-center justify-between">
+                <p>
+                  {car.price_per_day}/<span className="text-gray-500">day</span>
+                </p>
+                <button className="bg-[#3563e9] p-2 text-white rounded-md">
+                  <a href={`/morecars/${car.id}`}>Rent Now</a>
+                </button>
+              </CardFooter>
+            </Card>
           ))
         )}
       </div>
     </div>
   );
-}
+}  
