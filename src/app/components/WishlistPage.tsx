@@ -2,7 +2,6 @@
 "use client";
 import { useState, useEffect } from "react";
 import { FaHeart } from 'react-icons/fa';
-import Image from "next/image";
 
 type WishlistItem = {
   img: string | undefined;
@@ -34,7 +33,7 @@ const WishlistPage = () => {
     }
   }, [wishlist]);
 
-  
+  // Add item to wishlist
 
   // Remove item from wishlist
   const handleRemoveFromWishlist = (id: number) => {
@@ -52,11 +51,9 @@ const WishlistPage = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {wishlist.map((item) => (
             <div key={item.id} className="border rounded-lg p-4 shadow-md">
-              <Image
-                src={item.img || "/default-image.png"} // Provide a fallback image if `item.img` is undefined
+              <img
+                src={item.img}
                 alt={item.title}
-                width={300} // Adjust width as needed
-                height={200} // Adjust height as needed
                 className="w-full h-48 object-cover rounded-lg"
               />
               <div className="mt-4">
