@@ -1,133 +1,81 @@
-import React, { useState } from 'react';
+// components/WishlistPage.tsx
+"use client";
+import { useState, useEffect } from "react";
+import { FaHeart } from 'react-icons/fa';
+import Image from "next/image";
 
-const ReviewsComponent = () => {
-  // Initialize reviews with some permanent reviews and an empty new review
-  const [reviews, setReviews] = useState([
-    { id: 1, name: 'John Doe', rating: 5, comment: 'Excellent service!', date: '2025-01-25' },
-    { id: 2, name: 'Jane Smith', rating: 4, comment: 'Very good, but could be better.', date: '2025-01-24' },
-    { id: 3, name: 'Emily Davis', rating: 5, comment: 'Amazing experience! Highly recommend.', date: '2025-01-23' }
-  ]);
-  
-  const [newReview, setNewReview] = useState({ name: '', rating: 0, comment: '' });
+type WishlistItem = {
+  img: string | undefined;
+  title: string;
+  id: number;
+  price: number | string;
+};
 
-  // Handle submitting a new review
-  const handleReviewSubmit = (e: { preventDefault: () => void; }) => {
-    e.preventDefault();
+const cleanPrice = (price: string | number) =>
+  parseFloat(String(price).replace(/[^0-9.-]+/g, ""));
 
-    // Make sure newReview contains valid data before updating
-    if (newReview.name && newReview.rating > 0 && newReview.rating <= 5 && newReview.comment) {
-      // Add the new review to the reviews array
-      setReviews((prevReviews) => [...prevReviews, { ...newReview, id: Date.now(), date: new Date().toISOString().split('T')[0] }]);
+const WishlistPage = () => {
+  const [wishlist, setWishlist] = useState<WishlistItem[]>([]);
 
-      // Reset newReview state
-      setNewReview({ name: '', rating: 0, comment: '' });
+  // Load wishlist from localStorage on component mount
+  useEffect(() => {
+    const storedWishlist = localStorage.getItem("wishlist");
+    if (storedWishlist) {
+      setWishlist(JSON.parse(storedWishlist));
+    }
+  }, []);
+
+  // Save wishlist to localStorage whenever it changes
+  useEffect(() => {
+    if (wishlist.length > 0) {
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
     } else {
-      alert("Please fill in all fields with valid data.");
+      localStorage.removeItem("wishlist");
     }
-  };
+  }, [wishlist]);
 
-  // Handle star click to update rating
-  const handleStarClick = (rating: number) => {
-    if (rating >= 1 && rating <= 5) {
-      setNewReview({ ...newReview, rating });
-    }
+  
+
+  // Remove item from wishlist
+  const handleRemoveFromWishlist = (id: number) => {
+    const updatedWishlist = wishlist.filter((item) => item.id !== id);
+    setWishlist(updatedWishlist);
+    alert("Removed from wishlist!");
   };
 
   return (
-    <div>
-      {/* Customer Reviews Section */}
-      <div className="mt-12">
-        <h2 className="text-2xl font-bold text-gray-900 mb-6">Customer Reviews</h2>
-        <div className="space-y-6">
-          {reviews.length > 0 ? (
-            reviews.map((review) => (
-              <div
-                key={review.id}
-                className="flex flex-col p-6 bg-white rounded-lg shadow-md border border-gray-100"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center space-x-4">
-                    <div className="w-10 h-10 bg-gray-100 rounded-full flex items-center justify-center">
-                      <span className="text-gray-700 font-semibold text-lg">
-                        {review.name.charAt(0).toUpperCase()}
-                      </span>
-                    </div>
-                    <h3 className="text-lg font-semibold text-gray-900">{review.name}</h3>
-                  </div>
-                  <p className="text-sm text-gray-500">{review.date}</p>
-                </div>
-                <p className="mt-4 text-gray-700">{review.comment}</p>
-                <div className="flex items-center mt-4">
-                  {[...Array(5)].map((_, i) => (
-                    <span
-                      key={i}
-                      className={`text-xl ${i < review.rating ? 'text-yellow-400' : 'text-gray-300'}`}
-                    >
-                      ★
-                    </span>
-                  ))}
-                </div>
-              </div>
-            ))
-          ) : (
-            <div className="col-span-3 text-center py-8 bg-gray-50 rounded-lg">
-              <p className="text-gray-600">No reviews yet. Be the first to review!</p>
-            </div>
-          )}
-        </div>
-      </div>
-
-      {/* Add Review Section */}
-      <div className="mt-12 flex justify-center">
-        <div className="w-full max-w-2xl p-6 bg-white rounded-lg shadow-md border border-gray-100">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">Add a Review</h2>
-          <form onSubmit={handleReviewSubmit} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Name</label>
-              <input
-                type="text"
-                value={newReview.name}
-                onChange={(e) => setNewReview({ ...newReview, name: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                required
+    <div className="p-6 mt-11">
+      <h1 className="text-2xl font-bold mb-6">Your Wishlist</h1>
+      {wishlist.length === 0 ? (
+        <p>Your wishlist is empty!</p>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {wishlist.map((item) => (
+            <div key={item.id} className="border rounded-lg p-4 shadow-md">
+              <Image
+                src={item.img || "/default-image.png"} // Provide a fallback image if `item.img` is undefined
+                alt={item.title}
+                width={300} // Adjust width as needed
+                height={200} // Adjust height as needed
+                className="w-full h-48 object-cover rounded-lg"
               />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Rating</label>
-              <div className="flex space-x-2">
-                {[...Array(5)].map((_, i) => (
-                  <button
-                    key={i}
-                    type="button"
-                    onClick={() => handleStarClick(i + 1)}
-                    className={`text-2xl ${i < newReview.rating ? 'text-yellow-400' : 'text-gray-300'} hover:text-yellow-500 transition-colors duration-200`}
-                  >
-                    ★
-                  </button>
-                ))}
+              <div className="mt-4">
+                <p className="font-semibold truncate">{item.title}</p>
+                <p className="text-gray-600">${cleanPrice(item.price)}</p>
+                <button
+                  onClick={() => handleRemoveFromWishlist(item.id)}
+                  className="mt-2 text-red-600 text-sm underline flex items-center"
+                >
+                  <FaHeart className="mr-1" />
+                  Remove from Wishlist
+                </button>
               </div>
             </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-700">Comment</label>
-              <textarea
-                value={newReview.comment}
-                onChange={(e) => setNewReview({ ...newReview, comment: e.target.value })}
-                className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-blue-500 focus:border-blue-500"
-                rows={4}
-                required
-              ></textarea>
-            </div>
-            <button
-              type="submit"
-              className="px-4 py-2 bg-gray-950 text-white font-semibold rounded-lg hover:bg-gray-200 hover:text-black transition-colors duration-300"
-            >
-              Submit Review
-            </button>
-          </form>
+          ))}
         </div>
-      </div>
+      )}
     </div>
   );
 };
 
-export default ReviewsComponent;
+export default WishlistPage;
