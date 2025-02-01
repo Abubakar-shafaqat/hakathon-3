@@ -4,7 +4,7 @@
 import { useEffect, useState } from "react";
 import { useWishlist } from "../context/WishlistContext";
 import Image from "next/image"; // Import the Image component
-import { CardHeader, CardTitle, CardDescription, CardContent, CardFooter, Card } from "@/src/components/ui/card";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from "../../components/ui/card";
 import { faGasPump } from "@fortawesome/free-solid-svg-icons";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { MdPeopleOutline } from "react-icons/md";
