@@ -1,27 +1,51 @@
-"use client"; // Add this at the top since this is a client component
+"use client";
+import { createContext, useContext, useState, useEffect, ReactNode } from "react";
 
-import { useState, useContext, createContext, ReactNode } from "react";
-
-// Define the type for the context
 interface WishlistContextType {
   wishlist: number[];
-  addToWishlist: (id: number) => void;
-  removeFromWishlist: (id: number) => void;
+  addToWishlist: (CarId: number) => void;
+  removeFromWishlist: (CarId: number) => void;
 }
 
-// Create the context
 const WishlistContext = createContext<WishlistContextType | undefined>(undefined);
 
-// Create the provider component
 export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   const [wishlist, setWishlist] = useState<number[]>([]);
 
-  const addToWishlist = (id: number) => {
-    setWishlist((prev) => [...prev, id]);
+  // Load wishlist from localStorage on component mount
+  useEffect(() => {
+    try {
+      const storedWishlist = localStorage.getItem("wishlist");
+      if (storedWishlist) {
+        setWishlist(JSON.parse(storedWishlist));
+      }
+    } catch (error) {
+      console.error("Failed to load wishlist from localStorage:", error);
+    }
+  }, []);
+
+  // Save wishlist to localStorage whenever it changes
+  useEffect(() => {
+    try {
+      localStorage.setItem("wishlist", JSON.stringify(wishlist));
+    } catch (error) {
+      console.error("Failed to save wishlist to localStorage:", error);
+    }
+  }, [wishlist]);
+
+  // Add to wishlist
+  const addToWishlist = (CarId: number) => {
+    setWishlist((prev) => {
+      if (!prev.includes(CarId)) {
+        return [...prev, CarId];
+      }
+      return prev;
+    });
   };
 
-  const removeFromWishlist = (id: number) => {
-    setWishlist((prev) => prev.filter((item) => item !== id));
+  // Remove from wishlist
+  const removeFromWishlist = (CarId: number) => {
+    setWishlist((prev) => prev.filter((id) => id !== CarId));
   };
 
   return (
@@ -31,7 +55,6 @@ export const WishlistProvider = ({ children }: { children: ReactNode }) => {
   );
 };
 
-// Create the custom hook
 export const useWishlist = () => {
   const context = useContext(WishlistContext);
   if (!context) {
